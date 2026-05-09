@@ -1,69 +1,229 @@
 # Laberinto del Robot - Pensamiento Computacional
 
 ## Descripción del Proyecto
-Juego educativo para enseñar **Pensamiento Computacional** mediante la programación de un robot que debe llegar a la meta usando una secuencia de comandos (algoritmo).
 
-## Objetivos del Juego
-- El jugador aprende a descomponer un problema en pasos pequeños
-- Practica la secuenciación lógica de instrucciones
-- Comprende el concepto de algoritmo (lista de comandos)
-- Desarrolla habilidades de depuración (probar y corregir)
+Laberinto del Robot es un juego educativo desarrollado para enseñar conceptos básicos de Pensamiento Computacional mediante la programación de un robot virtual.
 
-## Cómo Jugar
-1. El robot comienza en (0,0) mirando hacia la DERECHA
-2. La meta está en (4,4) - esquina inferior derecha
-3. Hay paredes que no se pueden atravesar
-4. Programa una secuencia de hasta 6 comandos:
-   - AVANZAR → mueve el robot 1 casilla
-   - GIRAR → cambia dirección 90° a la derecha
-   - SALTAR → mueve el robot 2 casillas
-5. Presiona EJECUTAR para que el robot obedezca
-6. Si llegas a la meta → GANAS
-7. Si chocas con una pared → PIERDES
+El jugador debe construir una secuencia lógica de instrucciones para guiar al robot hasta la meta evitando obstáculos y paredes dentro del tablero.
 
-## Pseudocódigo del Algoritmo
+Este proyecto busca reforzar habilidades de resolución de problemas y comprensión de algoritmos de manera visual e interactiva.
 
+---
+
+# Objetivos del Juego
+
+El juego permite al estudiante:
+
+- Comprender el concepto de algoritmo
+- Descomponer problemas en pasos pequeños
+- Practicar la secuenciación lógica
+- Desarrollar habilidades de depuración
+- Analizar errores y corregir instrucciones
+
+---
+
+# Cómo Jugar
+
+## Reglas del Juego
+
+1. El robot inicia en la posición (0,0) mirando hacia la DERECHA
+2. La meta se encuentra en (4,4)
+3. Existen paredes que el robot no puede atravesar
+4. El jugador puede programar hasta 6 comandos
+5. Luego debe presionar EJECUTAR
+
+---
+
+## Comandos Disponibles
+
+| Comando | Acción |
+|---|---|
+| AVANZAR | Mueve el robot 1 casilla |
+| GIRAR | Gira 90° hacia la derecha |
+| SALTAR | Avanza 2 casillas |
+
+---
+
+## Condiciones del Juego
+
+- Si el robot llega a la meta → GANAS
+- Si el robot choca con una pared → PIERDES
+
+---
+
+# Algoritmo del Juego (Pseudocódigo)
+
+```text
 ALGORITMO juegoLaberinto
 
-tablero[5][5]
-muros ← {(1,1), (1,2), (2,2), (3,2), (3,1)}
-robot ← (0,0, dirección="DERECHA")
-meta ← (4,4)
-comandos ← []
+    DEFINIR tablero[5][5]
+    DEFINIR muros ← {(1,1), (1,2), (2,2), (3,2), (3,1)}
 
-REPETIR
-    SEGUN boton_presionado
-        "AVANZAR": agregar("AVANZAR", comandos)
-        "GIRAR": agregar("GIRAR", comandos)
-        "SALTAR": agregar("SALTAR", comandos)
-        "EJECUTAR":
-            PARA cada cmd EN comandos
-                SI cmd = "AVANZAR": mover(robot, 1)
-                SI cmd = "GIRAR": girar(robot)
-                SI cmd = "SALTAR": mover(robot, 2)
-                SI choca: error() y TERMINAR
-                SI llega a meta: victoria() y TERMINAR
-            FIN PARA
-            mensaje("No llegaste a la meta")
-            comandos ← []
-    FIN SEGUN
-HASTA QUE juego_terminado
+    DEFINIR robot ← (0,0, direccion="DERECHA")
+    DEFINIR meta ← (4,4)
 
-## Tecnologías Usadas
+    DEFINIR comandos ← []
 
-HTML5 - Estructura de la interfaz
-CSS3 - Estilos visuales y diseño responsivo
-JavaScript - Lógica del juego. Corre en cualquier navegador sin instalación
+    REPETIR
 
-## Estructura del Proyecto
+        SEGUN boton_presionado HACER
 
+            CASO "AVANZAR":
+                agregar("AVANZAR", comandos)
+
+            CASO "GIRAR":
+                agregar("GIRAR", comandos)
+
+            CASO "SALTAR":
+                agregar("SALTAR", comandos)
+
+            CASO "EJECUTAR":
+
+                PARA cada cmd EN comandos HACER
+
+                    SI cmd = "AVANZAR" ENTONCES
+                        mover(robot, 1)
+                    FIN SI
+
+                    SI cmd = "GIRAR" ENTONCES
+                        girar(robot)
+                    FIN SI
+
+                    SI cmd = "SALTAR" ENTONCES
+                        mover(robot, 2)
+                    FIN SI
+
+                    SI robot choca CON muro ENTONCES
+                        mostrar("ERROR: Colisión detectada")
+                        TERMINAR
+                    FIN SI
+
+                    SI robot llega A meta ENTONCES
+                        mostrar("¡Victoria!")
+                        TERMINAR
+                    FIN SI
+
+                FIN PARA
+
+                mostrar("No llegaste a la meta")
+                comandos ← []
+
+        FIN SEGUN
+
+    HASTA QUE juego_terminado
+
+# Explicación de la Estructura del Algoritmo
+
+El algoritmo del juego se divide en las siguientes etapas:
+
+| Etapa | Función |
+|---|---|
+| Inicialización | Configura tablero, robot y meta |
+| Entrada | El jugador agrega comandos |
+| Procesamiento | El sistema ejecuta instrucciones |
+| Validación | Se verifica colisión o victoria |
+| Finalización | Se muestra el resultado |
+
+---
+
+# Tecnologías Utilizadas
+
+| Tecnología | Uso en el Proyecto |
+|---|---|
+| HTML5 | Estructura de la interfaz |
+| CSS3 | Diseño visual y estilos |
+| JavaScript | Lógica y comportamiento del juego |
+
+---
+
+# Estructura del Proyecto
+
+```text
 /
-├── index.html          # Estructura principal
-├── style.css           # Estilos visuales
-├── script.js           # Lógica del juego
-├── pseudocodigo.txt    # Algoritmo en pseudocódigo
-└── README.md           # Este archivo
+├── index.html
+├── style.css
+├── script.js
+├── pseudocodigo.txt
+└── README.md
+```
 
-## Instalación y Ejecución
+Descripción de archivos:
 
-Abrir index.html en cualquier navegador
+- index.html → Estructura principal del juego
+- style.css → Diseño visual y estilos
+- script.js → Lógica y comportamiento del juego
+- pseudocodigo.txt → Algoritmo en pseudocódigo
+- README.md → Documentación del proyecto
+
+---
+
+# Instalación y Ejecución
+
+## Opción 1: Ejecutar directamente
+
+Abrir el archivo:
+
+```text
+index.html
+```
+
+en cualquier navegador moderno.
+
+---
+
+## Opción 2: Usar servidor local
+
+```bash
+python3 -m http.server 8000
+```
+
+Luego abrir:
+
+```text
+http://localhost:8000
+```
+
+---
+
+# Conceptos de Pensamiento Computacional Aplicados
+
+- Descomposición
+- Reconocimiento de patrones
+- Secuenciación
+- Algoritmos
+- Depuración
+- Resolución de problemas
+
+---
+
+# Complejidad del Algoritmo
+
+Complejidad temporal aproximada:
+
+```text
+O(n)
+```
+
+Donde `n` representa la cantidad de comandos ingresados por el jugador.
+
+---
+
+# Arquitectura del Proyecto
+
+```text
+Usuario
+   ↓
+Interfaz HTML/CSS
+   ↓
+JavaScript
+   ↓
+Procesamiento de comandos
+   ↓
+Actualización visual del tablero
+```
+
+---
+
+# Autor
+
+Proyecto desarrollado con fines educativos para el curso de Fundamentos de Programacion.
