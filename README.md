@@ -22,7 +22,8 @@ Juego educativo para enseñar **Pensamiento Computacional** mediante la programa
 7. Si chocas con una pared → PIERDES
 
 ## Pseudocódigo del Algoritmo
-ALGORITMO JuegoLaberinto
+
+ALGORITMO juegoLaberinto
 
 tablero[5][5]
 muros ← {(1,1), (1,2), (2,2), (3,2), (3,1)}
@@ -31,21 +32,21 @@ meta ← (4,4)
 comandos ← []
 
 REPETIR
-SEGUN boton_presionado
-"AVANZAR": agregar("AVANZAR", comandos)
-"GIRAR": agregar("GIRAR", comandos)
-"SALTAR": agregar("SALTAR", comandos)
-"EJECUTAR":
-PARA cada cmd EN comandos
-SI cmd="AVANZAR": mover(robot, 1)
-SI cmd="GIRAR": girar(robot)
-SI cmd="SALTAR": mover(robot, 2)
-SI choca: error() y TERMINAR
-SI llega a meta: victoria() y TERMINAR
-FIN PARA
-mensaje("No llegaste a la meta")
-comandos ← []
-FIN SEGUN
+    SEGUN boton_presionado
+        "AVANZAR": agregar("AVANZAR", comandos)
+        "GIRAR": agregar("GIRAR", comandos)
+        "SALTAR": agregar("SALTAR", comandos)
+        "EJECUTAR":
+            PARA cada cmd EN comandos
+                SI cmd = "AVANZAR": mover(robot, 1)
+                SI cmd = "GIRAR": girar(robot)
+                SI cmd = "SALTAR": mover(robot, 2)
+                SI choca: error() y TERMINAR
+                SI llega a meta: victoria() y TERMINAR
+            FIN PARA
+            mensaje("No llegaste a la meta")
+            comandos ← []
+    FIN SEGUN
 HASTA QUE juego_terminado
 
 
@@ -58,11 +59,11 @@ HASTA QUE juego_terminado
 
 ## Estructura del Proyecto
 /
-├── index.html # Estructura principal
-├── style.css # Estilos visuales
-├── script.js # Lógica del juego
-├── pseudocodigo.txt # Algoritmo en pseudocódigo
-└── README.md # Este archivo
+├── index.html          # Estructura principal
+├── style.css           # Estilos visuales
+├── script.js           # Lógica del juego
+├── pseudocodigo.txt    # Algoritmo en pseudocódigo
+└── README.md           # Este archivo
 
 ## Instalación y Ejecución
 ```bash
