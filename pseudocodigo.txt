@@ -1,0 +1,46 @@
+ALGORITMO JuegoLaberinto
+
+tablero[5][5]
+muros ← {(1,1), (1,2), (2,2), (3,2), (3,1)}
+robot ← (0,0, dirección="DERECHA")
+meta ← (4,4)
+comandos ← []
+
+// === BUCLE PRINCIPAL ===
+REPETIR
+    SEGUN boton_presionado
+        "AVANZAR":  agregar("AVANZAR", comandos)
+        "GIRAR":    agregar("GIRAR", comandos)
+        "SALTAR":   agregar("SALTAR", comandos)
+        "EJECUTAR": 
+            PARA cada cmd EN comandos HACER
+                SI cmd = "AVANZAR" ENTONCES
+                    nueva_pos ← mover(robot, 1)
+                    SI NO esMuro(nueva_pos) ENTONCES
+                        robot.posicion ← nueva_pos
+                    SINO
+                        error("Choque")
+                        TERMINAR
+                    FIN SI
+                FIN SI
+                SI cmd = "GIRAR" ENTONCES
+                    robot.direccion ← girar(robot.direccion)
+                FIN SI
+                SI cmd = "SALTAR" ENTONCES
+                    nueva_pos ← mover(robot, 2)
+                    SI NO esMuro(nueva_pos) ENTONCES
+                        robot.posicion ← nueva_pos
+                    SINO
+                        error("Salto fallido")
+                        TERMINAR
+                    FIN SI
+                FIN SI
+                SI robot.posicion = meta ENTONCES
+                    victoria()
+                    TERMINAR
+                FIN SI
+            FIN PARA
+            mensaje("No llegaste a la meta")
+            comandos ← []
+    FIN SEGUN
+HASTA QUE juego_terminado

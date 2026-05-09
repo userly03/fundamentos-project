@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeBot · Laberinto del Pensamiento Computacional</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- CABECERA -->
+        <header>
+            <h1>🤖 CODEBOT LABERINTO</h1>
+            <p class="subtitle">Programa la secuencia · Ejecuta · Llega a la meta </p>
+        </header>
+
+        <!-- ZONA PRINCIPAL: GRID + PANEL DE CONTROL -->
+        <div class="game-layout">
+            <!-- TABLERO 5x5 -->
+            <div class="board-container">
+                <div class="grid" id="grid"></div>
+                <div class="legend">
+                    <span>🧱 Muro</span> <span>🤖 Robot (dirección)</span> <span>🏆 Meta</span>
+                </div>
+            </div>
+
+            <!-- PANEL DE PROGRAMACIÓN -->
+            <div class="program-panel">
+                <div class="panel-header">
+                    <h3>TUS COMANDOS</h3>
+                    <span class="limit-indicator" id="limitIndicator">0 / 6</span>
+                </div>
+                <div class="command-timeline" id="commandTimeline">
+                    <div class="empty-commands">✦ Añade comandos con los botones ✦</div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="btnForward" class="cmd-btn forward">⬆️ AVANZAR</button>
+                    <button id="btnTurn" class="cmd-btn turn">🔄 GIRAR (90°)</button>
+                    <button id="btnJump" class="cmd-btn jump">⭐ SALTAR (2 celdas)</button>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="btnRun" class="action run">▶ EJECUTAR PROGRAMA</button>
+                    <button id="btnReset" class="action reset">LIMPIAR TODO</button>
+                </div>
+
+                <!-- ÁREA DE RETROALIMENTACIÓN (más visible) -->
+                <div class="feedback" id="feedback">
+                    Programa una secuencia (máx. 6 comandos) y pulsa EJECUTAR
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
