@@ -111,6 +111,7 @@ ALGORITMO juegoLaberinto
         FIN SEGUN
 
     HASTA QUE juego_terminado
+```
 
 # Explicación de la Estructura del Algoritmo
 
@@ -171,20 +172,6 @@ en cualquier navegador moderno.
 
 ---
 
-## Opción 2: Usar servidor local
-
-```bash
-python3 -m http.server 8000
-```
-
-Luego abrir:
-
-```text
-http://localhost:8000
-```
-
----
-
 # Conceptos de Pensamiento Computacional Aplicados
 
 - Descomposición
@@ -193,18 +180,6 @@ http://localhost:8000
 - Algoritmos
 - Depuración
 - Resolución de problemas
-
----
-
-# Complejidad del Algoritmo
-
-Complejidad temporal aproximada:
-
-```text
-O(n)
-```
-
-Donde `n` representa la cantidad de comandos ingresados por el jugador.
 
 ---
 
