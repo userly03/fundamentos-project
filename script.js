@@ -1,213 +1,219 @@
-// ==================== CONFIGURACIÓN DEL MUNDO ====================
-const SIZE = 5;
-const walls = [[1,1], [1,2], [2,2], [3,2], [3,1]];
-const goal = { x: 4, y: 4 };
-
-let robot = { x: 0, y: 0, dir: 'RIGHT' };
-let commandQueue = [];
-let gameActive = true;
-let victory = false;
-
-const dirVectors = {
-    'UP':    { dx: -1, dy: 0 },
-    'RIGHT': { dx: 0, dy: 1 },
-    'DOWN':  { dx: 1, dy: 0 },
-    'LEFT':  { dx: 0, dy: -1 }
-};
-const orderTurn = ['UP', 'RIGHT', 'DOWN', 'LEFT'];
-
-// ==================== FUNCIONES AUXILIARES ====================
-function isWall(x, y) {
-    return walls.some(w => w[0] === x && w[1] === y);
-}
-
-function updateFeedback(msg, isError = false) {
-    const fb = document.getElementById('feedback');
-    fb.innerHTML = msg;
-    fb.style.borderLeftColor = isError ? '#ff8a7a' : '#f5b642';
-    if (isError) {
-        setTimeout(() => {
-            if (document.getElementById('feedback').innerHTML === msg)
-                fb.style.borderLeftColor = '#f5b642';
-        }, 2000);
+// ========== CLASE ROBOT ==========
+class Robot {
+    constructor(x, y, dir) {
+        this.x = x;
+        this.y = y;
+        this.dir = dir; // UP, RIGHT, DOWN, LEFT
+    }
+    
+    avanzar() {
+        const v = { 'UP':[-1,0], 'RIGHT':[0,1], 'DOWN':[1,0], 'LEFT':[0,-1] };
+        const d = v[this.dir];
+        return { x: this.x + d[0], y: this.y + d[1] };
+    }
+    
+    saltar() {
+        const v = { 'UP':[-1,0], 'RIGHT':[0,1], 'DOWN':[1,0], 'LEFT':[0,-1] };
+        const d = v[this.dir];
+        return { x: this.x + d[0]*2, y: this.y + d[1]*2 };
+    }
+    
+    girar() {
+        const orden = ['UP', 'RIGHT', 'DOWN', 'LEFT'];
+        let idx = orden.indexOf(this.dir);
+        this.dir = orden[(idx + 1) % 4];
+    }
+    
+    moverA(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
 
-function renderGrid() {
-    const gridContainer = document.getElementById('grid');
-    gridContainer.innerHTML = '';
-    for (let i = 0; i < SIZE; i++) {
-        for (let j = 0; j < SIZE; j++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            if (isWall(i, j)) {
-                cell.classList.add('wall');
-                cell.textContent = '🧱';
-            } else if (robot.x === i && robot.y === j) {
-                cell.classList.add('robot');
-                const arrow = { 'UP': '⬆️', 'RIGHT': '➡️', 'DOWN': '⬇️', 'LEFT': '⬅️' }[robot.dir];
-                cell.textContent = arrow;
-            } else if (goal.x === i && goal.y === j) {
-                cell.classList.add('goal');
-                cell.textContent = '🏆';
-            } else {
-                cell.textContent = '·';
+// ========== CLASE TABLERO ==========
+class Tablero {
+    constructor() {
+        this.size = 5;
+        this.walls = [[1,1], [1,2], [2,2], [3,2], [3,1]];
+        this.goal = { x: 4, y: 4 };
+    }
+    
+    hayMuro(x, y) {
+        return this.walls.some(w => w[0] === x && w[1] === y);
+    }
+    
+    esMeta(x, y) {
+        return this.goal.x === x && this.goal.y === y;
+    }
+    
+    esValido(x, y) {
+        return x >= 0 && x < this.size && y >= 0 && y < this.size && !this.hayMuro(x, y);
+    }
+}
+
+// ========== CLASE JUEGO (controla todo) ==========
+class JuegoLaberinto {
+    constructor() {
+        this.tablero = new Tablero();
+        this.robot = new Robot(0, 0, 'RIGHT');
+        this.comandos = [];
+        this.activo = true;
+        this.gano = false;
+    }
+    
+    agregarComando(cmd) {
+        if (!this.activo || this.gano) return false;
+        if (this.comandos.length >= 6) return false;
+        this.comandos.push(cmd);
+        return true;
+    }
+    
+    ejecutarPrograma() {
+        if (!this.activo) return { error: "Juego terminado" };
+        if (this.gano) return { error: "Ya ganaste" };
+        if (this.comandos.length === 0) return { error: "Sin comandos" };
+        
+        for (let cmd of this.comandos) {
+            let resultado = this._ejecutarUnComando(cmd);
+            if (!resultado.exito) {
+                this.comandos = [];
+                return { error: resultado.error };
             }
-            gridContainer.appendChild(cell);
+            if (this.tablero.esMeta(this.robot.x, this.robot.y)) {
+                this.gano = true;
+                this.activo = false;
+                this.comandos = [];
+                return { victoria: true };
+            }
+        }
+        
+        let llego = this.tablero.esMeta(this.robot.x, this.robot.y);
+        this.comandos = [];
+        return { llego: llego };
+    }
+    
+    _ejecutarUnComando(cmd) {
+        let nuevaPos;
+        switch(cmd) {
+            case 'AVANZAR':
+                nuevaPos = this.robot.avanzar();
+                if (!this.tablero.esValido(nuevaPos.x, nuevaPos.y)) {
+                    this.activo = false;
+                    return { exito: false, error: "CHOQUE" };
+                }
+                this.robot.moverA(nuevaPos.x, nuevaPos.y);
+                break;
+            case 'GIRAR':
+                this.robot.girar();
+                break;
+            case 'SALTAR':
+                nuevaPos = this.robot.saltar();
+                if (!this.tablero.esValido(nuevaPos.x, nuevaPos.y)) {
+                    this.activo = false;
+                    return { exito: false, error: "SALTO FALLIDO" };
+                }
+                this.robot.moverA(nuevaPos.x, nuevaPos.y);
+                break;
+        }
+        return { exito: true };
+    }
+    
+    reiniciar() {
+        this.robot = new Robot(0, 0, 'RIGHT');
+        this.comandos = [];
+        this.activo = true;
+        this.gano = false;
+    }
+}
+
+// ========== CONECTAR CON HTML ==========
+const juego = new JuegoLaberinto();
+
+function renderGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+            const celda = document.createElement('div');
+            celda.classList.add('cell');
+            if (juego.tablero.hayMuro(i, j)) {
+                celda.classList.add('wall');
+                celda.textContent = '🧱';
+            } else if (juego.robot.x === i && juego.robot.y === j) {
+                celda.classList.add('robot');
+                const flecha = { 'UP':'⬆️', 'RIGHT':'➡️', 'DOWN':'⬇️', 'LEFT':'⬅️' };
+                celda.textContent = flecha[juego.robot.dir];
+            } else if (juego.tablero.esMeta(i, j)) {
+                celda.classList.add('goal');
+                celda.textContent = '🏆';
+            } else {
+                celda.textContent = '·';
+            }
+            grid.appendChild(celda);
         }
     }
 }
 
-function updateCommandDisplay() {
+function actualizarComandos() {
     const timeline = document.getElementById('commandTimeline');
-    const limitSpan = document.getElementById('limitIndicator');
-    limitSpan.innerText = `${commandQueue.length} / 6`;
-    
-    if (commandQueue.length === 0) {
+    const indicador = document.getElementById('limitIndicator');
+    indicador.innerText = `${juego.comandos.length} / 6`;
+    if (juego.comandos.length === 0) {
         timeline.innerHTML = '<div class="empty-commands">✦ Añade comandos con los botones ✦</div>';
         return;
     }
     timeline.innerHTML = '';
-    commandQueue.forEach((cmd, idx) => {
+    juego.comandos.forEach(cmd => {
         const badge = document.createElement('span');
         badge.className = 'command-badge';
-        let icon = '';
-        if (cmd === 'AVANZAR') icon = ' ';
-        if (cmd === 'GIRAR') icon = '🔄 ';
-        if (cmd === 'SALTAR') icon = '⭐ ';
-        badge.textContent = `${icon}${cmd}`;
+        const icono = cmd === 'AVANZAR' ? '⬆️ ' : cmd === 'GIRAR' ? '🔄 ' : '⭐ ';
+        badge.textContent = icono + cmd;
         timeline.appendChild(badge);
     });
 }
 
-function checkWin() {
-    if (robot.x === goal.x && robot.y === goal.y && gameActive && !victory) {
-        victory = true;
-        gameActive = false;
-        updateFeedback('¡VICTORIA! Lograste la secuencia perfecta. Usa LIMPIAR TODO para otra partida. 🏆');
-        renderGrid();
-        return true;
-    }
-    return false;
-}
-
-function executeSingleCommand(cmd) {
-    if (!gameActive) return false;
-    
-    if (cmd === 'AVANZAR') {
-        const vec = dirVectors[robot.dir];
-        const newX = robot.x + vec.dx;
-        const newY = robot.y + vec.dy;
-        if (newX < 0 || newX >= SIZE || newY < 0 || newY >= SIZE || isWall(newX, newY)) {
-            gameActive = false;
-            updateFeedback('¡CHOQUE! El robot golpeó un muro o se salió. Partida terminada. 💥', true);
-            renderGrid();
-            return false;
-        }
-        robot.x = newX;
-        robot.y = newY;
-        renderGrid();
-        return true;
-    }
-    else if (cmd === 'GIRAR') {
-        let idx = orderTurn.indexOf(robot.dir);
-        robot.dir = orderTurn[(idx + 1) % 4];
-        renderGrid();
-        return true;
-    }
-    else if (cmd === 'SALTAR') {
-        const vec = dirVectors[robot.dir];
-        const newX = robot.x + vec.dx * 2;
-        const newY = robot.y + vec.dy * 2;
-        if (newX < 0 || newX >= SIZE || newY < 0 || newY >= SIZE || isWall(newX, newY)) {
-            gameActive = false;
-            updateFeedback('🚫 SALTO FALLIDO: No puedes saltar fuera del mapa o contra un muro. 🚫', true);
-            renderGrid();
-            return false;
-        }
-        robot.x = newX;
-        robot.y = newY;
-        renderGrid();
-        return true;
-    }
-    return true;
-}
-
-function runProgram() {
-    if (!gameActive && victory) {
-        updateFeedback('Ya ganaste. Presiona LIMPIAR TODO para un nuevo desafío.', true);
-        return;
-    }
-    if (!gameActive) {
-        updateFeedback('Juego terminado. Usa "LIMPIAR TODO" para reiniciar.', true);
-        return;
-    }
-    if (commandQueue.length === 0) {
-        updateFeedback(' No has programado nada. Añade AVANZAR, GIRAR o SALTAR.', true);
-        return;
-    }
-    
-    updateFeedback('Ejecutando programa...');
-    // pequeño delay para dar feedback visual
-    setTimeout(() => {
-        for (let i = 0; i < commandQueue.length; i++) {
-            if (!gameActive) break;
-            executeSingleCommand(commandQueue[i]);
-            if (checkWin()) break;
-        }
-        
-        if (gameActive && !victory && robot.x === goal.x && robot.y === goal.y) {
-            checkWin();
-        }
-        else if (gameActive && !victory && !(robot.x === goal.x && robot.y === goal.y)) {
-            updateFeedback('La secuencia terminó, pero NO llegaste a la meta. Revisa tu algoritmo. Prueba usar Girar.', false);
-        } else if (!gameActive && !victory) {
-            // ya se mostró error específico
-        }
-        
-        // Limpiar comandos después de ejecutar
-        commandQueue = [];
-        updateCommandDisplay();
-        renderGrid();
-    }, 20);
+function feedback(msg, error = false) {
+    const fb = document.getElementById('feedback');
+    fb.innerHTML = msg;
+    fb.style.borderLeftColor = error ? '#ff8a7a' : '#f5b642';
 }
 
 function addCommand(cmd) {
-    if (!gameActive && !victory) {
-        updateFeedback('Juego terminado por error. Usa LIMPIAR TODO para reiniciar.', true);
+    if (!juego.agregarComando(cmd)) {
+        feedback('No se puede agregar: juego terminado', true);
         return;
     }
-    if (victory) {
-        updateFeedback('Ya ganaste. Presiona LIMPIAR TODO para jugar de nuevo.', true);
-        return;
-    }
-    if (commandQueue.length >= 6) {
-        updateFeedback('Máximo 6 comandos. Presiona EJECUTAR o LIMPIAR TODO.', true);
-        return;
-    }
-    commandQueue.push(cmd);
-    updateCommandDisplay();
-    // feedback amigable
-    let msg = `➕ Comando "${cmd}" añadido. `;
-    msg += (commandQueue.length === 6) ? '¡Límite alcanzado! Ejecuta o limpia.' : `Tienes ${commandQueue.length}/6 comandos.`;
-    updateFeedback(msg);
-}
-
-function resetGame() {
-    robot = { x: 0, y: 0, dir: 'RIGHT' };
-    gameActive = true;
-    victory = false;
-    commandQueue = [];
-    updateCommandDisplay();
+    actualizarComandos();
     renderGrid();
-    updateFeedback('Todo reiniciado. ¡Crea tu mejor algoritmo para llegar a la meta!');
+    feedback(`➕ ${cmd} agregado`);
 }
 
-// ==================== EVENTOS Y ARRANQUE ====================
-document.getElementById('btnForward').addEventListener('click', () => addCommand('AVANZAR'));
-document.getElementById('btnTurn').addEventListener('click', () => addCommand('GIRAR'));
-document.getElementById('btnJump').addEventListener('click', () => addCommand('SALTAR'));
-document.getElementById('btnRun').addEventListener('click', runProgram);
-document.getElementById('btnReset').addEventListener('click', resetGame);
+function ejecutar() {
+    const resultado = juego.ejecutarPrograma();
+    if (resultado.error) {
+        feedback(`❌ ${resultado.error}`, true);
+    } else if (resultado.victoria) {
+        feedback('🏆 ¡VICTORIA! 🏆');
+    } else if (!resultado.llego) {
+        feedback('No llegaste a la meta. Sigue intentando.');
+    }
+    actualizarComandos();
+    renderGrid();
+}
 
-resetGame();
+function reiniciar() {
+    juego.reiniciar();
+    actualizarComandos();
+    renderGrid();
+    feedback('Juego reiniciado. ¡Programa tu secuencia!');
+}
+
+// Eventos
+document.getElementById('btnForward').onclick = () => addCommand('AVANZAR');
+document.getElementById('btnTurn').onclick = () => addCommand('GIRAR');
+document.getElementById('btnJump').onclick = () => addCommand('SALTAR');
+document.getElementById('btnRun').onclick = ejecutar;
+document.getElementById('btnReset').onclick = reiniciar;
+
+// Iniciar
+reiniciar();
